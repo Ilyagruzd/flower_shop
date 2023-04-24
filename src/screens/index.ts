@@ -1,0 +1,5 @@
+export { Cart } from './Cart'
+export { Profile } from './Profile'
+export { AboutUs } from './AboutUs'
+export { Shop } from './Shop'
+export { ProductInfo } from './Shop/ProductInfo'
