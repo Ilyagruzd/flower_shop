@@ -1,12 +1,12 @@
 import { SafeAreaView } from '@/components/SafeAreaView'
-import React, { useRef, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import { View, Text, Button, TextInput } from 'react-native'
 import MaskInput from 'react-native-mask-input'
 import { PhoneAuthProvider, signInWithCredential } from 'firebase/auth'
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'
 import { app, auth, db } from '@/utils/firebase'
 import { useAuthentication } from '@/utils/useAuthentication'
-import { collection, doc, getDoc, query, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const mask = [
 	'+',
@@ -91,6 +91,7 @@ export const Profile = () => {
 				<MaskInput
 					value={phoneNumber}
 					keyboardType='numeric'
+					editable={!verificationId}
 					style={{ fontSize: 22, alignSelf: 'center', margin: 20 }}
 					onChangeText={(masked, unmasked) => {
 						setPhoneNumber(unmasked)
@@ -99,16 +100,10 @@ export const Profile = () => {
 				/>
 				<Button
 					title='Send Verification Code'
-					disabled={!phoneNumber}
+					disabled={!phoneNumber || !!verificationId}
 					onPress={getCode}
 				/>
 				<Text style={{ marginTop: 20 }}>Enter Verification code</Text>
-				<TextInput
-					style={{ marginVertical: 10, fontSize: 17 }}
-					editable={!!verificationId}
-					placeholder='123456'
-					onChangeText={setVerificationCode}
-				/>
 				<MaskInput
 					value={verificationCode}
 					keyboardType='numeric'
@@ -118,7 +113,7 @@ export const Profile = () => {
 				/>
 				<Button
 					title='Confirm Verification Code'
-					disabled={!verificationId}
+					disabled={!verificationCode}
 					onPress={sendCode}
 				/>
 				<Text>{message}</Text>

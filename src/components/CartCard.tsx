@@ -1,19 +1,53 @@
-import { CartItem, Product } from '@/db/model'
+import { Cart, CartDb, Product } from '@/db/model'
 import { NavigationProps } from '@/screens/Shop'
 import { useNavigation } from '@react-navigation/native'
 import React, { FC, useState } from 'react'
 import { AntDesign } from '@expo/vector-icons'
 import { View, Text, TouchableOpacity, Image } from 'react-native'
+import { useFirestoreDocumentMutation } from '@react-query-firebase/firestore'
+import { collection, doc } from 'firebase/firestore'
+import { db } from '@/utils/firebase'
 
-const CartCard: FC<CartItem> = ({ product, count }) => {
+interface Props {
+	product: Product
+	count: number
+	cart: Cart
+	increaseCountDb: () => CartDb
+	decreaseCountDb: () => CartDb
+	deleteCartItem: () => CartDb
+}
+
+const CartCard: FC<Props> = ({
+	product,
+	count,
+	cart,
+	decreaseCountDb,
+	increaseCountDb,
+	deleteCartItem
+}) => {
 	const navigation = useNavigation<NavigationProps>()
-	const [localCount, setLocalCount] = useState<number>(count)
 
-	const increaseCount = () => setLocalCount(localCount + 1)
-	const decreaseCount = () => setLocalCount(localCount - 1)
+	const mutation = useFirestoreDocumentMutation(
+		doc(collection(db, 'carts'), cart.id),
+		{
+			merge: true
+		}
+	)
+
+	const increaseCount = () => {
+		mutation.mutate(increaseCountDb())
+	}
+
+	const decreaseCount = () => {
+		mutation.mutate(decreaseCountDb())
+	}
 
 	const handleNavigateOnScreen = () => {
 		navigation.navigate('ProductInfo', { productId: product.id })
+	}
+
+	const hanleDelete = () => {
+		mutation.mutate(deleteCartItem())
 	}
 
 	return (
@@ -46,25 +80,25 @@ const CartCard: FC<CartItem> = ({ product, count }) => {
 							<AntDesign
 								name='minuscircleo'
 								size={24}
-								color={localCount === 0 ? 'gray' : 'black'}
+								color={count === 0 ? 'gray' : 'black'}
 								onPress={decreaseCount}
-								disabled={localCount === 0}
+								disabled={count === 0}
 							/>
 						</TouchableOpacity>
 						<Text style={{ fontSize: 18, width: 30, textAlign: 'center' }}>
-							{localCount}
+							{count}
 						</Text>
 						<AntDesign
 							name='pluscircleo'
 							size={24}
-							color={localCount === product.count ? 'gray' : 'black'}
+							color={count === product.count ? 'gray' : 'black'}
 							onPress={increaseCount}
-							disabled={localCount === product.count}
+							disabled={count === product.count}
 						/>
 					</View>
 				</View>
 			</View>
-			<AntDesign name='delete' size={24} color='black' />
+			<AntDesign name='delete' size={24} color='black' onPress={hanleDelete} />
 		</View>
 	)
 }
