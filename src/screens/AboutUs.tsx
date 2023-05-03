@@ -1,6 +1,6 @@
 import { SafeAreaView } from '@/components/SafeAreaView'
 import React from 'react'
-import { Text } from 'react-native'
+import { Text, Button } from 'react-native'
 
 export const AboutUs = () => {
 	return (

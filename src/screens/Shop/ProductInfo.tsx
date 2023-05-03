@@ -1,5 +1,5 @@
 import { RouteProp, useRoute } from '@react-navigation/native'
-import React from 'react'
+import React, { useContext } from 'react'
 import { View, Text } from 'react-native'
 import { StackParamList } from '../Shop'
 import { Button } from '@rneui/themed'
@@ -8,9 +8,15 @@ import { doc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
 import { useFirestoreDocument } from '@react-query-firebase/firestore'
 import { Product } from '@/db/model'
+import { UserContext, CartContext } from '../../../App'
+import { addCartItem } from '@/utils/func'
+import Toast from 'react-native-root-toast'
 
 export const ProductInfo = () => {
 	const route = useRoute<RouteProp<StackParamList, 'ProductInfo'>>()
+	const user = useContext(UserContext)
+	const cart = useContext(CartContext)
+
 	const { productId } = route.params
 
 	const ref = doc(db, 'products', productId)
@@ -29,6 +35,13 @@ export const ProductInfo = () => {
 		return <Text>Nothing</Text>
 	}
 
+	const handleAddCartItem = () =>
+		user && cart && cart.activeCart
+			? addCartItem(cart.activeCart, product)
+			: Toast.show('Залогиньтесь', {
+					duration: Toast.durations.SHORT
+			  })
+
 	return (
 		<View
 			style={{
@@ -45,7 +58,7 @@ export const ProductInfo = () => {
 					<Text style={{ fontSize: 18 }}>{product.description}</Text>
 				</View>
 			</View>
-			<Button size='lg' title='Купить' />
+			<Button size='lg' title='Купить' onPress={handleAddCartItem} />
 		</View>
 	)
 }

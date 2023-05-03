@@ -78,7 +78,7 @@ export const Profile = () => {
 		}
 	}
 
-	if (user) return <Text>Ты крутой перец</Text>
+	if (user) return <Text>Ты крутой перец {JSON.stringify(user.toJSON())}</Text>
 
 	return (
 		<SafeAreaView>

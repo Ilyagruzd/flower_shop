@@ -1,10 +1,8 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { TabsEnum } from './tabs.enum'
 import { Cart, Shop, AboutUs, Profile } from '@/screens/index'
 import { Fontisto, AntDesign, Ionicons } from '@expo/vector-icons'
-import { CartWithoutUser } from '@/screens/CartWithoutUser'
-import { UserContext } from '../../../App'
 
 const iconChange = (icon: JSX.Element, activeIcon: JSX.Element) => {
 	return {
@@ -17,7 +15,6 @@ const iconChange = (icon: JSX.Element, activeIcon: JSX.Element) => {
 
 export const TabsBottom = () => {
 	const Tab = createBottomTabNavigator()
-	const user = useContext(UserContext)
 
 	return (
 		<Tab.Navigator screenOptions={{ headerShown: false }}>
@@ -47,7 +44,7 @@ export const TabsBottom = () => {
 			/>
 			<Tab.Screen
 				name={TabsEnum.Cart}
-				component={() => <Cart user={user!} />}
+				component={Cart}
 				options={iconChange(
 					<AntDesign name='shoppingcart' size={24} color='gray' />,
 					<AntDesign name='shoppingcart' size={24} color='black' />

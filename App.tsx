@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { User } from 'firebase/auth'
 import { useAuthentication } from '@/utils/useAuthentication'
 import { CartContextInterface, useCart } from '@/utils/useCart'
+import { RootSiblingParent } from 'react-native-root-siblings'
 
 const queryClient = new QueryClient()
 export const UserContext = createContext<User | undefined>(undefined)
@@ -22,9 +23,11 @@ export default function App() {
 			<UserContext.Provider value={user}>
 				<CartContext.Provider value={cart}>
 					<SafeAreaProvider>
-						<View style={{ height: '100%' }}>
-							<Navigator />
-						</View>
+						<RootSiblingParent>
+							<View style={{ height: '100%' }}>
+								<Navigator />
+							</View>
+						</RootSiblingParent>
 					</SafeAreaProvider>
 				</CartContext.Provider>
 			</UserContext.Provider>

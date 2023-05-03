@@ -1,45 +1,39 @@
 import { Cart, CartDb, Product } from '@/db/model'
 import { NavigationProps } from '@/screens/Shop'
 import { useNavigation } from '@react-navigation/native'
-import React, { FC, useState } from 'react'
+import React, { FC, useContext, useState } from 'react'
 import { AntDesign } from '@expo/vector-icons'
 import { View, Text, TouchableOpacity, Image } from 'react-native'
 import { useFirestoreDocumentMutation } from '@react-query-firebase/firestore'
 import { collection, doc } from 'firebase/firestore'
 import { db } from '@/utils/firebase'
+import { CartContext } from '../../App'
+import { changeCartItemCount, deleteCartItem } from '@/utils/func'
 
 interface Props {
 	product: Product
 	count: number
-	cart: Cart
-	increaseCountDb: () => CartDb
-	decreaseCountDb: () => CartDb
-	deleteCartItem: () => CartDb
 }
 
-const CartCard: FC<Props> = ({
-	product,
-	count,
-	cart,
-	decreaseCountDb,
-	increaseCountDb,
-	deleteCartItem
-}) => {
+const CartCard: FC<Props> = ({ product, count }) => {
 	const navigation = useNavigation<NavigationProps>()
+	const cart = useContext(CartContext)
 
 	const mutation = useFirestoreDocumentMutation(
-		doc(collection(db, 'carts'), cart.id),
+		doc(collection(db, 'carts'), cart!.activeCart!.id),
 		{
 			merge: true
 		}
 	)
 
-	const increaseCount = () => {
-		mutation.mutate(increaseCountDb())
-	}
-
-	const decreaseCount = () => {
-		mutation.mutate(decreaseCountDb())
+	const changeCount = (count: number) => {
+		const { cartWithRef, newCart } = changeCartItemCount(
+			cart!.activeCart!,
+			product.id,
+			count
+		)
+		cart?.setActiveCart(newCart)
+		mutation.mutate(cartWithRef)
 	}
 
 	const handleNavigateOnScreen = () => {
@@ -47,7 +41,12 @@ const CartCard: FC<Props> = ({
 	}
 
 	const hanleDelete = () => {
-		mutation.mutate(deleteCartItem())
+		const { cartWithRef, newCart } = deleteCartItem(
+			cart!.activeCart!,
+			product.id
+		)
+		cart!.setActiveCart(newCart)
+		mutation.mutate(cartWithRef)
 	}
 
 	return (
@@ -81,7 +80,7 @@ const CartCard: FC<Props> = ({
 								name='minuscircleo'
 								size={24}
 								color={count === 0 ? 'gray' : 'black'}
-								onPress={decreaseCount}
+								onPress={() => changeCount(count - 1)}
 								disabled={count === 0}
 							/>
 						</TouchableOpacity>
@@ -92,7 +91,7 @@ const CartCard: FC<Props> = ({
 							name='pluscircleo'
 							size={24}
 							color={count === product.count ? 'gray' : 'black'}
-							onPress={increaseCount}
+							onPress={() => changeCount(count + 1)}
 							disabled={count === product.count}
 						/>
 					</View>
